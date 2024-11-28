@@ -1,18 +1,28 @@
 import React, { useState, useEffect } from "react";
 import "./SnakeGame.css";
 
-// Snake Game component
 const SnakeGame = () => {
   // Initialize game state
   const [snake, setSnake] = useState([[10, 10]]);
-  const [direction, setDirection] = useState("right");
+  const [direction, setDirection] = useState(Math.floor(Math.random() * 4) + 1);
   const [apple, setApple] = useState([15, 15]);
   const [score, setScore] = useState(0);
   const [gameOver, setGameOver] = useState(false);
+  const [rows, setRows] = useState(0);
+  const [cols, setCols] = useState(0);
 
-  // Grid size
-  const rows = 30;
-  const cols = 30;
+  // Cell size (px)
+  const cellSize = 30;
+
+  // Calculate rows and cols based on browser height
+  useEffect(() => {
+    const height = window.innerHeight - 150;
+    const width = window.innerWidth - 50;
+    const rows = Math.floor((height < width ? height : width) / cellSize);
+    const cols = rows;
+    setRows(rows);
+    setCols(cols);
+  }, []);
 
   // Movement logic
   const moveSnake = () => {
@@ -22,16 +32,16 @@ const SnakeGame = () => {
 
     // Calculate new head position based on direction
     switch (direction) {
-      case "right":
+      case 4:
         newHead = [head[0], head[1] + 1];
         break;
-      case "left":
+      case 3:
         newHead = [head[0], head[1] - 1];
         break;
-      case "up":
+      case 1:
         newHead = [head[0] - 1, head[1]];
         break;
-      case "down":
+      case 2:
         newHead = [head[0] + 1, head[1]];
         break;
       default:
@@ -80,28 +90,41 @@ const SnakeGame = () => {
 
   // Handle key presses
   const handleKeyPress = (e) => {
+    let d;
+    const oppositeDirection = {
+      1: 2,
+      2: 1,
+      3: 4,
+      4: 3,
+    };
     switch (e.key) {
       case "ArrowRight":
-        setDirection("right");
+        d = 4;
         break;
       case "ArrowLeft":
-        setDirection("left");
+        d = 3;
         break;
       case "ArrowUp":
-        setDirection("up");
+        d = 1;
         break;
       case "ArrowDown":
-        setDirection("down");
+        d = 2;
         break;
       default:
         break;
+    }
+
+    if (oppositeDirection[direction] === d) {
+      //backwards movement
+    } else {
+      setDirection(d);
     }
   };
 
   // Handle reset
   const handleReset = () => {
-    setSnake([[10, 10]]);
-    setDirection("right");
+    setSnake([[Math.floor(rows / 2), Math.floor(cols / 2)]]);
+    setDirection(Math.floor(Math.random() * 4) + 1);
     setApple([15, 15]);
     setScore(0);
     setGameOver(false);
@@ -121,45 +144,33 @@ const SnakeGame = () => {
 
   return (
     <div className="container">
-      <div className="details">
-        <h1>Snake Game</h1>
-        <button
-          className="reset"
-          onClick={() => {
-            handleReset();
-          }}
-        >
-          reset
-        </button>
-
-        <h2>Score: {score}</h2>
-      </div>
-      <div style={{ height: "100" }}></div>
+      <div className="signature">by: Krishna Kenny</div>
       <div className="game-container">
+        <h2 className="game-over">Score: {score}</h2>
         {gameOver ? (
-          <h2 className="game-over">Game Over! Score: {score}</h2>
+          <button className="reset" onClick={handleReset}>
+            reset
+          </button>
         ) : (
-          <div>
-            <div className="game-grid">
-              {Array(rows)
-                .fill()
-                .map((_, i) => (
-                  <div key={i} className="row">
-                    {Array(cols)
-                      .fill()
-                      .map((_, j) => (
-                        <div
-                          key={`${i}-${j}`}
-                          className={`cell ${
-                            snake.some(([x, y]) => x === i && y === j)
-                              ? "snake"
-                              : ""
-                          } ${apple[0] === i && apple[1] === j ? "apple" : ""}`}
-                        />
-                      ))}
-                  </div>
-                ))}
-            </div>
+          <div className="game-grid">
+            {Array(rows)
+              .fill()
+              .map((_, i) => (
+                <div key={i} className="row">
+                  {Array(cols)
+                    .fill()
+                    .map((_, j) => (
+                      <div
+                        key={`${i}-${j}`}
+                        className={`cell ${
+                          snake.some(([x, y]) => x === i && y === j)
+                            ? "snake"
+                            : ""
+                        } ${apple[0] === i && apple[1] === j ? "apple" : ""}`}
+                      />
+                    ))}
+                </div>
+              ))}
           </div>
         )}
       </div>
