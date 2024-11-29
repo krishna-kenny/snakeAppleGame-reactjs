@@ -71,7 +71,9 @@ const SnakeGame = () => {
             Math.floor(Math.random() * rows),
             Math.floor(Math.random() * cols),
           ];
-        } while (snake.some(([x, y]) => x === newApple[0] && y === newApple[1]));
+        } while (
+          snake.some(([x, y]) => x === newApple[0] && y === newApple[1])
+        );
         setApple(newApple);
         grow = true;
       }
@@ -130,51 +132,43 @@ const SnakeGame = () => {
     setGameOver(false);
   };
 
-  const getReckoning = (head, apple) => {
-    const directions = {
-      1: 0, // Up (decrease row index)
-      2: 0, // Down (increase row index)
-      3: 0, // Left
-      4: 0, // Right
-    };
-
-    // Vertical reckoning
-    if (apple[0] < head[0]) {
-      directions[1] = head[0] - apple[0]; // Up
-    } else if (apple[0] > head[0]) {
-      directions[2] = apple[0] - head[0]; // Down
-    }
-
-    // Horizontal reckoning
-    if (apple[1] < head[1]) {
-      directions[3] = head[1] - apple[1]; // Left
-    } else if (apple[1] > head[1]) {
-      directions[4] = apple[1] - head[1]; // Right
-    }
-
-    return directions;
-  };
-
   const aiSnake = () => {
     document.removeEventListener("keydown", handleKeyPress);
     handleReset();
-    let head;
-    let deadReckoning;
-    while (true) {
-      head = snake[0];
-      deadReckoning = getReckoning(head, apple);
-      for (let i = 1; i < 5; i++) {
-        setDirection(i);
-        while (deadReckoning[i] > 0) {
-          moveSnake();
-        }
+
+    const deadReckoning = () => {
+      const head = snake[0];
+      let newDirection = direction;
+
+      if (apple[0] < head[0]) {
+        newDirection = 1; // Move up
+      } else if (apple[0] > head[0]) {
+        newDirection = 2; // Move down
+      } else if (apple[1] < head[1]) {
+        newDirection = 3; // Move left
+      } else if (apple[1] > head[1]) {
+        newDirection = 4; // Move right
       }
-    }
+
+      // Update direction and move
+      setDirection(newDirection);
+    };
+
+    // Start AI movement with an interval
+    const interval = setInterval(() => {
+      if (gameOver) {
+        clearInterval(interval);
+        setAI(false);
+        return;
+      }
+      deadReckoning();
+      moveSnake();
+    }, 100);
   };
 
   const easterEgg = () => {
-    setAI(true);
-    aiSnake();
+    setAI(!AI);
+    if (AI) aiSnake();
   };
 
   useEffect(() => {
