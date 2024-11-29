@@ -10,6 +10,7 @@ const SnakeGame = () => {
   const [gameOver, setGameOver] = useState(false);
   const [rows, setRows] = useState(0);
   const [cols, setCols] = useState(0);
+  const [AI, setAI] = useState(false);
 
   // Cell size (px)
   const cellSize = 30;
@@ -26,22 +27,21 @@ const SnakeGame = () => {
 
   // Movement logic
   const moveSnake = () => {
-    // Get current snake head position
     const head = snake[0];
     let newHead;
 
-    // Calculate new head position based on direction
+    // Updated movement logic
     switch (direction) {
-      case 4:
+      case 4: // Right
         newHead = [head[0], head[1] + 1];
         break;
-      case 3:
+      case 3: // Left
         newHead = [head[0], head[1] - 1];
         break;
-      case 1:
+      case 1: // Up (decrease row index)
         newHead = [head[0] - 1, head[1]];
         break;
-      case 2:
+      case 2: // Down (increase row index)
         newHead = [head[0] + 1, head[1]];
         break;
       default:
@@ -56,29 +56,27 @@ const SnakeGame = () => {
       newHead[1] >= cols ||
       snake.some(([x, y]) => x === newHead[0] && y === newHead[1])
     ) {
-      // Game over
       setGameOver(true);
     } else {
-      // Move snake
       let grow = false;
 
       // Check if snake eats apple
       if (newHead[0] === apple[0] && newHead[1] === apple[1]) {
-        // Increase score and generate new apple
         setScore(score + 1);
+
+        // Generate new apple
         let newApple;
         do {
           newApple = [
             Math.floor(Math.random() * rows),
             Math.floor(Math.random() * cols),
           ];
-        } while (
-          snake.some(([x, y]) => x === newApple[0] && y === newApple[1])
-        );
+        } while (snake.some(([x, y]) => x === newApple[0] && y === newApple[1]));
         setApple(newApple);
         grow = true;
       }
 
+      // Update snake position
       let newSnake = [newHead, ...snake];
       if (!grow) {
         newSnake = newSnake.slice(0, -1);
@@ -88,15 +86,16 @@ const SnakeGame = () => {
     }
   };
 
-  // Handle key presses
   const handleKeyPress = (e) => {
     let d;
-    const oppositeDirection = {
-      1: 2,
-      2: 1,
-      3: 4,
-      4: 3,
+    const validDirection = {
+      1: [3, 4], // Up
+      2: [3, 4], // Down
+      3: [1, 2], // Left
+      4: [1, 2], // Right
     };
+
+    // Map keys to directions
     switch (e.key) {
       case "ArrowRight":
         d = 4;
@@ -114,14 +113,15 @@ const SnakeGame = () => {
         break;
     }
 
-    if (oppositeDirection[direction] === d) {
-      //backwards movement
-    } else {
+    if (
+      d === validDirection[direction][0] ||
+      d === validDirection[direction][1]
+    ) {
       setDirection(d);
+      moveSnake();
     }
   };
 
-  // Handle reset
   const handleReset = () => {
     setSnake([[Math.floor(rows / 2), Math.floor(cols / 2)]]);
     setDirection(Math.floor(Math.random() * 4) + 1);
@@ -130,12 +130,58 @@ const SnakeGame = () => {
     setGameOver(false);
   };
 
-  // Set up game loop and event listeners
+  const getReckoning = (head, apple) => {
+    const directions = {
+      1: 0, // Up (decrease row index)
+      2: 0, // Down (increase row index)
+      3: 0, // Left
+      4: 0, // Right
+    };
+
+    // Vertical reckoning
+    if (apple[0] < head[0]) {
+      directions[1] = head[0] - apple[0]; // Up
+    } else if (apple[0] > head[0]) {
+      directions[2] = apple[0] - head[0]; // Down
+    }
+
+    // Horizontal reckoning
+    if (apple[1] < head[1]) {
+      directions[3] = head[1] - apple[1]; // Left
+    } else if (apple[1] > head[1]) {
+      directions[4] = apple[1] - head[1]; // Right
+    }
+
+    return directions;
+  };
+
+  const aiSnake = () => {
+    document.removeEventListener("keydown", handleKeyPress);
+    handleReset();
+    let head;
+    let deadReckoning;
+    while (true) {
+      head = snake[0];
+      deadReckoning = getReckoning(head, apple);
+      for (let i = 1; i < 5; i++) {
+        setDirection(i);
+        while (deadReckoning[i] > 0) {
+          moveSnake();
+        }
+      }
+    }
+  };
+
+  const easterEgg = () => {
+    setAI(true);
+    aiSnake();
+  };
+
   useEffect(() => {
     if (gameOver) return;
 
     document.addEventListener("keydown", handleKeyPress);
-    const interval = setInterval(moveSnake, 200);
+    const interval = setInterval(moveSnake, 100);
     return () => {
       clearInterval(interval);
       document.removeEventListener("keydown", handleKeyPress);
@@ -144,7 +190,9 @@ const SnakeGame = () => {
 
   return (
     <div className="container">
-      <div className="signature">by: Krishna Kenny</div>
+      <button className="signature" onClick={easterEgg}>
+        by: Krishna Kenny
+      </button>
       <div className="game-container">
         <h2 className="game-over">Score: {score}</h2>
         {gameOver ? (

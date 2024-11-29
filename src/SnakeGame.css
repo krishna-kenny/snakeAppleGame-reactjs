@@ -10,6 +10,8 @@
   margin: 25px;
   right: 0;
   bottom: 0;
+  background-color: black;
+  border: none;
 }
 
 .container {
