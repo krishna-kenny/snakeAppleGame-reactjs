@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/snakeAppleGame-reactjs/static/css/main.906dcfd2.css",
+    "main.js": "/snakeAppleGame-reactjs/static/js/main.7645d04e.js",
+    "static/js/453.6650bfa5.chunk.js": "/snakeAppleGame-reactjs/static/js/453.6650bfa5.chunk.js",
+    "index.html": "/snakeAppleGame-reactjs/index.html",
+    "main.906dcfd2.css.map": "/snakeAppleGame-reactjs/static/css/main.906dcfd2.css.map",
+    "main.7645d04e.js.map": "/snakeAppleGame-reactjs/static/js/main.7645d04e.js.map",
+    "453.6650bfa5.chunk.js.map": "/snakeAppleGame-reactjs/static/js/453.6650bfa5.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.906dcfd2.css",
+    "static/js/main.7645d04e.js"
+  ]
+}
